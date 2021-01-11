@@ -23,6 +23,7 @@ func (m MysqlConfig) ConnectionString() string {
 type DefaultConfig struct {
 	Port     int         `json:"port"`
 	Env      string      `json:"env"`
+	Salt     string      `json:"salt"`
 	Database MysqlConfig `json:"database"`
 }
 

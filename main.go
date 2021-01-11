@@ -4,7 +4,6 @@ import (
 	"commerce/config"
 	"commerce/models"
 	"commerce/routes"
-	"fmt"
 )
 
 func main() {
@@ -13,7 +12,7 @@ func main() {
 		models.WithMysql(cfg.Database.ConnectionString()),
 		models.WithUserModel(),
 	)
-	fmt.Println(m)
+	// m.ApplyMigration()
 
-	routes.Run(cfg.Port, m)
+	routes.Run(cfg.Port, m, cfg.Salt)
 }

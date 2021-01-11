@@ -1,6 +1,7 @@
 {
     "port": 3000,
     "env": "dev",
+    "salt": "sadafsdfsdfdasfsdf",
     "database": {
       "host": "127.0.0.1:3306",
       "user": "root",

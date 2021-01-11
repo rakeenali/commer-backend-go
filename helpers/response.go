@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	statusOk  = "OK"
-	statusErr = "ERROR"
+	statusOk      = "OK"
+	statusErr     = "ERROR"
+	statusBodyErr = "BODY_ERROR"
 )
 
 type Response struct {
@@ -24,7 +25,7 @@ func InvalidBodyErrorResponse(c *gin.Context, data interface{}) {
 
 	res.Message = "Invalid body"
 	res.Data = data
-	res.Status = statusErr
+	res.Status = statusBodyErr
 	c.JSON(http.StatusBadRequest, res)
 }
 
@@ -56,5 +57,24 @@ func OKResponse(c *gin.Context, message string, code int, data interface{}) {
 
 	res.Data = data
 	res.Status = statusOk
+	c.JSON(httpCode, res)
+}
+
+// ErrResponse will return a response with error
+func ErrResponse(c *gin.Context, message string, code int, data interface{}) {
+	var res Response
+
+	httpCode := code
+	res.Message = message
+
+	if message == "" {
+		res.Message = "Error"
+	}
+	if code == 0 {
+		httpCode = http.StatusNotFound
+	}
+
+	res.Data = data
+	res.Status = statusErr
 	c.JSON(httpCode, res)
 }
