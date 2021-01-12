@@ -17,7 +17,9 @@ func intializeRoutes(
 ) {
 
 	apiV1 := router.Group("/api/v1")
-	addUserRoutes(apiV1, models, hash, jwt)
+	mw := newMiddlewares(models, jwt)
+
+	initUserRoutes(apiV1, models, hash, jwt, mw)
 }
 
 // Run will initialize gin routes

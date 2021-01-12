@@ -2,21 +2,21 @@ package routes
 
 import (
 	"commerce/auth"
+	"commerce/context"
 	"commerce/hash"
 	"commerce/helpers"
 	"commerce/models"
-	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func addUserRoutes(
+func initUserRoutes(
 	rg *gin.RouterGroup,
 	models *models.Models,
 	hash hash.Service,
 	jwt auth.Auth,
+	mw *middlewares,
 ) {
 	router := rg.Group("/users")
 
@@ -26,6 +26,8 @@ func addUserRoutes(
 	group.GET("/", users.GetUsers)
 	group.POST("/register", users.RegisterUser)
 	group.POST("/login", users.LoginUser)
+
+	group.Use(mw.requireUser)
 	group.GET("/authenticate", users.Authenticate)
 }
 
@@ -145,32 +147,6 @@ func (u *Users) LoginUser(c *gin.Context) {
 
 // Authenticate will authenticate user's token
 func (u *Users) Authenticate(c *gin.Context) {
-	bearer := c.GetHeader("Authorization")
-	if bearer == "" {
-		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
-		return
-	}
-
-	st := strings.Split(bearer, "Bearer")
-	token := strings.TrimSpace(st[1])
-	if token == "" {
-		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
-		return
-	}
-
-	userToken, err := u.jwt.VerifyToken(token)
-	if err != nil {
-		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
-		return
-	}
-
-	fmt.Println(userToken)
-	user, err := u.models.User.ByUsername(userToken.Username)
-	if err != nil {
-		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
-		return
-	}
-	user.Password = ""
-
+	user := context.GetUser(c)
 	helpers.OKResponse(c, "Login successfull", http.StatusOK, user)
 }
