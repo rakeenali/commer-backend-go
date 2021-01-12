@@ -1,31 +1,46 @@
 package routes
 
 import (
+	"commerce/auth"
 	"commerce/hash"
 	"commerce/helpers"
 	"commerce/models"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func addUserRoutes(rg *gin.RouterGroup, models *models.Models, hash hash.Service) {
+func addUserRoutes(
+	rg *gin.RouterGroup,
+	models *models.Models,
+	hash hash.Service,
+	jwt auth.Auth,
+) {
 	router := rg.Group("/users")
 
-	users := newUserRouter(router, models, hash)
+	users := newUserRouter(router, models, hash, jwt)
 	group := users.rg
 
 	group.GET("/", users.GetUsers)
 	group.POST("/register", users.RegisterUser)
 	group.POST("/login", users.LoginUser)
+	group.GET("/authenticate", users.Authenticate)
 }
 
 // NewUsersRoute initialize users route
-func newUserRouter(rg *gin.RouterGroup, models *models.Models, hash hash.Service) *Users {
+func newUserRouter(
+	rg *gin.RouterGroup,
+	models *models.Models,
+	hash hash.Service,
+	jwt auth.Auth,
+) *Users {
 	return &Users{
 		rg:     rg,
 		models: models,
 		hash:   hash,
+		jwt:    jwt,
 	}
 }
 
@@ -34,6 +49,7 @@ type Users struct {
 	rg     *gin.RouterGroup
 	models *models.Models
 	hash   hash.Service
+	jwt    auth.Auth
 }
 
 // GetUsers is dummy
@@ -112,7 +128,49 @@ func (u *Users) LoginUser(c *gin.Context) {
 		return
 	}
 
-	user.Password = ""
-	helpers.OKResponse(c, "User created successfully", http.StatusOK, &user)
+	token := u.jwt.SignToken(&auth.User{
+		Username: user.Username,
+		ID:       user.ID,
+	})
+
+	m := map[string]interface{}{
+		"username": user.Username,
+		"id":       user.ID,
+		"token":    token,
+	}
+
+	helpers.OKResponse(c, "Login successfull", http.StatusOK, m)
 	return
+}
+
+// Authenticate will authenticate user's token
+func (u *Users) Authenticate(c *gin.Context) {
+	bearer := c.GetHeader("Authorization")
+	if bearer == "" {
+		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
+		return
+	}
+
+	st := strings.Split(bearer, "Bearer")
+	token := strings.TrimSpace(st[1])
+	if token == "" {
+		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
+		return
+	}
+
+	userToken, err := u.jwt.VerifyToken(token)
+	if err != nil {
+		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
+		return
+	}
+
+	fmt.Println(userToken)
+	user, err := u.models.User.ByUsername(userToken.Username)
+	if err != nil {
+		helpers.OKResponse(c, "Invalid token", http.StatusOK, nil)
+		return
+	}
+	user.Password = ""
+
+	helpers.OKResponse(c, "Login successfull", http.StatusOK, user)
 }

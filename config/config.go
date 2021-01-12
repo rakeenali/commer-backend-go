@@ -24,6 +24,7 @@ type DefaultConfig struct {
 	Port     int         `json:"port"`
 	Env      string      `json:"env"`
 	Salt     string      `json:"salt"`
+	Secret   string      `json:"jwt_secret"`
 	Database MysqlConfig `json:"database"`
 }
 
