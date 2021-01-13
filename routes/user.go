@@ -61,8 +61,8 @@ func (u *Users) GetUsers(c *gin.Context) {
 
 // RegisterUser creates a new user
 func (u *Users) RegisterUser(c *gin.Context) {
-	var data userSchema
-	var user models.User
+	var data userRegisterSchema
+	// var user models.User
 	err := c.ShouldBindJSON(&data)
 	if err != nil {
 		helpers.InternalServerErrorResponse(c, err)
@@ -85,8 +85,14 @@ func (u *Users) RegisterUser(c *gin.Context) {
 	hash := u.hash.GeneratePasswordHash(data.Password)
 	data.Password = hash
 
-	user.Username = data.Username
-	user.Password = hash
+	user := models.User{
+		Username: data.Username,
+		Password: data.Password,
+		Account: models.Accounts{
+			FirstName: data.FirstName,
+			LastName:  data.LastName,
+		},
+	}
 
 	err = u.models.User.Create(&user)
 	if err != nil {
@@ -136,9 +142,8 @@ func (u *Users) LoginUser(c *gin.Context) {
 	})
 
 	m := map[string]interface{}{
-		"username": user.Username,
-		"id":       user.ID,
-		"token":    token,
+		"user":  user,
+		"token": token,
 	}
 
 	helpers.OKResponse(c, "Login successfull", http.StatusOK, m)

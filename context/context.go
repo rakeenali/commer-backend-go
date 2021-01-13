@@ -2,7 +2,6 @@ package context
 
 import (
 	"commerce/models"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +23,6 @@ func GetUser(c *gin.Context) *models.User {
 	}
 
 	user, ok := temp.(*models.User)
-	fmt.Println(user)
 	if ok {
 		return user
 	}

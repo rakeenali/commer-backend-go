@@ -1,12 +1,16 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // User db model
 type User struct {
+	// gorm.Model
 	GormModelPK
-	Username string `gorm:"not null;uniqueIndex" json:"username"`
-	Password string `gorm:"not null;" json:"password"`
+	Username string   `gorm:"not null;uniqueIndex" json:"username"`
+	Password string   `gorm:"not null;" json:"password"`
+	Account  Accounts `gorm:"foreignKey:UserID;references:ID" json:"account"`
 	GormModelSfd
 }
 
@@ -14,7 +18,7 @@ type User struct {
 type userModel interface {
 	Create(*User) error
 
-	ByUsername(username string) (*User, error)
+	ByUsername(string) (*User, error)
 }
 
 // newUserModel will initialize the user model
@@ -32,15 +36,26 @@ type userGorm struct {
 var _ userModel = &userGorm{}
 
 func (ug *userGorm) Create(user *User) error {
-	return ug.db.Create(user).Error
+	err := ug.db.Create(user).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ug *userGorm) ByUsername(username string) (*User, error) {
 	var user User
-	err := first(ug.db.Where("username = ?", username), &user)
+
+	err := ug.db.Where("username = ?",
+		username).Preload("Account").First(&user).Error
+
 	if err != nil {
 		return nil, err
 	}
 
 	return &user, nil
 }
+
+// st := ug.db.Session(&gorm.Session{DryRun: true}).Where("username = ?", username).First(&user).Statement
+// fmt.Println(st.SQL.String())

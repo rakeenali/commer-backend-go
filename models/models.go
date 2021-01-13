@@ -29,6 +29,15 @@ func WithUserModel() ModelConfig {
 	}
 }
 
+// WithAccountsModel will initialize user model
+func WithAccountsModel() ModelConfig {
+	return func(m *Models) error {
+		am := newAccountsModel(m.db)
+		m.Accounts = am
+		return nil
+	}
+}
+
 // NewModels will initialize models
 func NewModels(fns ...ModelConfig) *Models {
 	var m Models
@@ -44,12 +53,18 @@ func NewModels(fns ...ModelConfig) *Models {
 
 // Models struct for db
 type Models struct {
-	User userModel
-	db   *gorm.DB
+	User     userModel
+	Accounts AccountsModel
+	db       *gorm.DB
 }
 
 // ApplyMigration will drop all the tables provided and will then create new migrations
 func (m *Models) ApplyMigration() {
+	destroyTables(m)
+	m.db.AutoMigrate(&User{}, &Accounts{})
+}
+
+func destroyTables(m *Models) {
 	exist := m.db.Migrator().HasTable(&User{})
 	if exist {
 		err := m.db.Migrator().DropTable(&User{})
@@ -57,6 +72,11 @@ func (m *Models) ApplyMigration() {
 			panic(err)
 		}
 	}
-
-	m.db.AutoMigrate(&User{})
+	exist = m.db.Migrator().HasTable(&Accounts{})
+	if exist {
+		err := m.db.Migrator().DropTable(&Accounts{})
+		if err != nil {
+			panic(err)
+		}
+	}
 }

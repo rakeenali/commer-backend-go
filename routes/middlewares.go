@@ -5,7 +5,6 @@ import (
 	"commerce/context"
 	"commerce/helpers"
 	"commerce/models"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -32,6 +31,7 @@ func (m *middlewares) requireUser(c *gin.Context) {
 	bearer := c.GetHeader("Authorization")
 	if bearer == "" {
 		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		c.Abort()
 		return
 	}
 
@@ -39,23 +39,25 @@ func (m *middlewares) requireUser(c *gin.Context) {
 	token := strings.TrimSpace(st[1])
 	if token == "" {
 		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		c.Abort()
 		return
 	}
 
 	userToken, err := m.jwt.VerifyToken(token)
 	if err != nil {
 		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		c.Abort()
 		return
 	}
 
 	user, err := m.models.User.ByUsername(userToken.Username)
 	if err != nil {
 		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		c.Abort()
 		return
 	}
 	user.Password = ""
 
-	fmt.Println("runing middleware")
-
 	context.SetUser(c, user)
+	c.Next()
 }
