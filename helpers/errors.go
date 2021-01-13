@@ -6,7 +6,7 @@ import "errors"
 // 	ErrNotFound = "models: resource not found"
 // )
 var (
-	ErrNotFound = errors.New("Resource not found")
-
-	ErrInvalidToken = errors.New("Auth Token is not valid")
+	ErrNotFound      = errors.New("Resource not found")
+	ErrInvalidToken  = errors.New("Auth Token is not valid")
+	ErrAccountUpdate = errors.New("Error occurred while updating account")
 )

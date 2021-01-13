@@ -29,6 +29,7 @@ func initUserRoutes(
 
 	group.Use(mw.requireUser)
 	group.GET("/authenticate", users.Authenticate)
+	group.POST("/account-update", users.UpdateAccount)
 }
 
 // NewUsersRoute initialize users route
@@ -154,4 +155,26 @@ func (u *Users) LoginUser(c *gin.Context) {
 func (u *Users) Authenticate(c *gin.Context) {
 	user := context.GetUser(c)
 	helpers.OKResponse(c, "Login successfull", http.StatusOK, user)
+}
+
+// UpdateAccount will update users account firstname and lastname
+func (u *Users) UpdateAccount(c *gin.Context) {
+	var body updateAccountSchema
+	user := context.GetUser(c)
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		helpers.InternalServerErrorResponse(c, err)
+		return
+	}
+
+	account, err := u.models.Accounts.Update(user.Account.ID, &models.Accounts{
+		FirstName: body.FirstName,
+		LastName:  body.LastName,
+	})
+	if err != nil {
+		helpers.InternalServerErrorResponse(c, err)
+		return
+	}
+
+	helpers.OKResponse(c, "Account Updated", http.StatusOK, account)
 }

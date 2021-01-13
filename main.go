@@ -15,7 +15,7 @@ func main() {
 		models.WithAccountsModel(),
 	)
 	jwt := auth.InitAuth(cfg.Secret)
-	m.ApplyMigration()
+	// m.ApplyMigration()
 
 	routes.Run(cfg.Port, m, cfg.Salt, jwt)
 }

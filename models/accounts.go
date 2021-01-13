@@ -1,6 +1,11 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"commerce/helpers"
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 // Accounts gorm model
 type Accounts struct {
@@ -14,7 +19,7 @@ type Accounts struct {
 
 // AccountsModel interface that implements the account model
 type AccountsModel interface {
-	Create(account *Accounts) error
+	Update(uint, *Accounts) (*Accounts, error)
 }
 
 // returns pointer to accounts model implementation
@@ -28,6 +33,29 @@ type accountsModel struct {
 	db *gorm.DB
 }
 
-func (am *accountsModel) Create(account *Accounts) error {
-	return am.db.Create(&account).Error
+func (am *accountsModel) Update(id uint, account *Accounts) (*Accounts, error) {
+	var find Accounts
+	find.ID = id
+
+	fmt.Println("account", account)
+
+	err := am.db.First(&find).Error
+	if err != nil {
+		return nil, helpers.ErrNotFound
+	}
+
+	if account.FirstName != "" {
+		find.FirstName = account.FirstName
+	}
+	if account.LastName != "" {
+		find.LastName = account.LastName
+	}
+	fmt.Println("find", find)
+
+	err = am.db.Save(find).Error
+	if err != nil {
+		return nil, helpers.ErrAccountUpdate
+	}
+
+	return &find, nil
 }

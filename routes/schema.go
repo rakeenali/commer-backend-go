@@ -16,6 +16,11 @@ type userRegisterSchema struct {
 	LastName  string `json:"last_name" validate:"required"`
 }
 
+type updateAccountSchema struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 type publicError struct {
 	Field   string
 	Message string
