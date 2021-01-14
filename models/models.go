@@ -38,6 +38,15 @@ func WithAccountsModel() ModelConfig {
 	}
 }
 
+// WithUserRoleModel will initialize user role model
+func WithUserRoleModel() ModelConfig {
+	return func(m *Models) error {
+		userRole := newUserRoleModel(m.db)
+		m.UserRole = userRole
+		return nil
+	}
+}
+
 // NewModels will initialize models
 func NewModels(fns ...ModelConfig) *Models {
 	var m Models
@@ -55,16 +64,18 @@ func NewModels(fns ...ModelConfig) *Models {
 type Models struct {
 	User     userModel
 	Accounts AccountsModel
+	UserRole UserRoleModel
 	db       *gorm.DB
 }
 
 // ApplyMigration will drop all the tables provided and will then create new migrations
 func (m *Models) ApplyMigration() {
-	destroyTables(m)
-	m.db.AutoMigrate(&User{}, &Accounts{})
+	m.db.AutoMigrate(&User{}, &Accounts{}, &UserRole{})
 }
 
-func destroyTables(m *Models) {
+// DestroyTables will destroy tables
+func (m *Models) DestroyTables() {
+
 	exist := m.db.Migrator().HasTable(&User{})
 	if exist {
 		err := m.db.Migrator().DropTable(&User{})

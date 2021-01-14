@@ -13,9 +13,10 @@ func main() {
 		models.WithMysql(cfg.Database.ConnectionString()),
 		models.WithUserModel(),
 		models.WithAccountsModel(),
+		models.WithUserRoleModel(),
 	)
 	jwt := auth.InitAuth(cfg.Secret)
-	// m.ApplyMigration()
+	m.ApplyMigration()
 
 	routes.Run(cfg.Port, m, cfg.Salt, jwt)
 }

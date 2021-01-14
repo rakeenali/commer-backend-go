@@ -8,9 +8,12 @@ import (
 type User struct {
 	// gorm.Model
 	GormModelPK
+
 	Username string   `gorm:"not null;uniqueIndex" json:"username"`
 	Password string   `gorm:"not null;" json:"password"`
 	Account  Accounts `gorm:"foreignKey:UserID;references:ID" json:"account"`
+	Role     UserRole `gorm:"foreignKey:UserID;references:ID" json:"user_role"`
+
 	GormModelSfd
 }
 
