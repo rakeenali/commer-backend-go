@@ -30,7 +30,7 @@ type middlewares struct {
 func (m *middlewares) requireUser(c *gin.Context) {
 	bearer := c.GetHeader("Authorization")
 	if bearer == "" {
-		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidToken, http.StatusUnauthorized)
 		c.Abort()
 		return
 	}
@@ -38,21 +38,21 @@ func (m *middlewares) requireUser(c *gin.Context) {
 	st := strings.Split(bearer, "Bearer")
 	token := strings.TrimSpace(st[1])
 	if token == "" {
-		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidToken, http.StatusUnauthorized)
 		c.Abort()
 		return
 	}
 
 	userToken, err := m.jwt.VerifyToken(token)
 	if err != nil {
-		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidToken, http.StatusUnauthorized)
 		c.Abort()
 		return
 	}
 
 	user, err := m.models.User.ByUsername(userToken.Username)
 	if err != nil {
-		helpers.ErrResponse(c, helpers.ErrInvalidToken.Error(), http.StatusUnauthorized, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidToken, http.StatusUnauthorized)
 		c.Abort()
 		return
 	}

@@ -79,7 +79,7 @@ func (u *Users) RegisterUser(c *gin.Context) {
 	exist, _ := u.models.User.ByUsername(data.Username)
 
 	if exist != nil {
-		helpers.ErrResponse(c, "User with username already exist", http.StatusConflict, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrUserExist, http.StatusConflict)
 		return
 	}
 
@@ -101,7 +101,7 @@ func (u *Users) RegisterUser(c *gin.Context) {
 		return
 	}
 	user.Password = ""
-	helpers.OKResponse(c, "User created successfully", http.StatusCreated, &user)
+	helpers.OKResponse(c, helpers.SucUserCreated, http.StatusCreated, &user)
 }
 
 // LoginUser will authenticate a user
@@ -123,7 +123,7 @@ func (u *Users) LoginUser(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case helpers.ErrNotFound:
-			helpers.ErrResponse(c, "Invalid email or password", http.StatusNotFound, nil)
+			helpers.ErrResponse(c, nil, helpers.ErrInvalidCredentials, http.StatusNotFound)
 		default:
 			helpers.InternalServerErrorResponse(c, err)
 		}
@@ -133,7 +133,7 @@ func (u *Users) LoginUser(c *gin.Context) {
 	match := u.hash.MatchPassword(user.Password, data.Password)
 
 	if !match {
-		helpers.ErrResponse(c, "Invalid email or password", http.StatusNotFound, nil)
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidCredentials, http.StatusNotFound)
 		return
 	}
 
@@ -147,14 +147,14 @@ func (u *Users) LoginUser(c *gin.Context) {
 		"token": token,
 	}
 
-	helpers.OKResponse(c, "Login successfull", http.StatusOK, m)
+	helpers.OKResponse(c, helpers.SucUserLogin, http.StatusOK, m)
 	return
 }
 
 // Authenticate will authenticate user's token
 func (u *Users) Authenticate(c *gin.Context) {
 	user := context.GetUser(c)
-	helpers.OKResponse(c, "Login successfull", http.StatusOK, user)
+	helpers.OKResponse(c, helpers.SucUserLogin, http.StatusOK, user)
 }
 
 // UpdateAccount will update users account firstname and lastname
@@ -176,5 +176,5 @@ func (u *Users) UpdateAccount(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "Account Updated", http.StatusOK, account)
+	helpers.OKResponse(c, helpers.SucAccountUpdated, http.StatusOK, account)
 }

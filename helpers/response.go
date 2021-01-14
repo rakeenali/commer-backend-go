@@ -13,13 +13,14 @@ const (
 	statusBodyErr = "BODY_ERROR"
 )
 
+// Response body for api
 type Response struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 	Status  string      `json:"status"`
 }
 
-// InvalidBodyResponse will return an invalid if request body is not valid
+// InvalidBodyErrorResponse will return an invalid if request body is not valid
 func InvalidBodyErrorResponse(c *gin.Context, data interface{}) {
 	var res Response
 
@@ -61,17 +62,20 @@ func OKResponse(c *gin.Context, message string, code int, data interface{}) {
 }
 
 // ErrResponse will return a response with error
-func ErrResponse(c *gin.Context, message string, code int, data interface{}) {
+func ErrResponse(c *gin.Context, data interface{}, err error, code int) {
 	var res Response
 
 	httpCode := code
-	res.Message = message
 
-	if message == "" {
-		res.Message = "Error"
-	}
 	if code == 0 {
 		httpCode = http.StatusNotFound
+	}
+
+	if pErr, ok := err.(PublicError); ok {
+		res.Message = pErr.Public()
+	} else {
+		fmt.Println("Error", err)
+		res.Message = "An unknown error ocurred"
 	}
 
 	res.Data = data
