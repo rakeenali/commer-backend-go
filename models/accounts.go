@@ -2,7 +2,6 @@ package models
 
 import (
 	"commerce/helpers"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -37,8 +36,6 @@ func (am *accountsModel) Update(id uint, account *Accounts) (*Accounts, error) {
 	var find Accounts
 	find.ID = id
 
-	fmt.Println("account", account)
-
 	err := am.db.First(&find).Error
 	if err != nil {
 		return nil, helpers.ErrNotFound
@@ -50,7 +47,6 @@ func (am *accountsModel) Update(id uint, account *Accounts) (*Accounts, error) {
 	if account.LastName != "" {
 		find.LastName = account.LastName
 	}
-	fmt.Println("find", find)
 
 	err = am.db.Save(find).Error
 	if err != nil {

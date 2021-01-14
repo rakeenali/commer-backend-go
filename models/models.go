@@ -47,6 +47,24 @@ func WithUserRoleModel() ModelConfig {
 	}
 }
 
+// WithTagsModel will initialize user tags model
+func WithTagsModel() ModelConfig {
+	return func(m *Models) error {
+		tm := newTagsModel(m.db)
+		m.Tags = tm
+		return nil
+	}
+}
+
+// WithItemsModel will initialize user tags model
+func WithItemsModel() ModelConfig {
+	return func(m *Models) error {
+		im := newItemsModel(m.db)
+		m.Items = im
+		return nil
+	}
+}
+
 // NewModels will initialize models
 func NewModels(fns ...ModelConfig) *Models {
 	var m Models
@@ -65,12 +83,15 @@ type Models struct {
 	User     userModel
 	Accounts AccountsModel
 	UserRole UserRoleModel
-	db       *gorm.DB
+	Tags     TagsModel
+	Items    ItemsModel
+
+	db *gorm.DB
 }
 
 // ApplyMigration will drop all the tables provided and will then create new migrations
 func (m *Models) ApplyMigration() {
-	m.db.AutoMigrate(&User{}, &Accounts{}, &UserRole{})
+	m.db.AutoMigrate(&User{}, &Accounts{}, &UserRole{}, &Tags{}, &Items{})
 }
 
 // DestroyTables will destroy tables

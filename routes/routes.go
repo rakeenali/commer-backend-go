@@ -63,7 +63,6 @@ func (r *Router) Run(port int) {
 
 	apiV1 := g.Group("/api/v1")
 
-	fmt.Println(r.userRouter)
 	r.userRouter.InitUserRoutes(apiV1, r.middlewares)
 
 	g.Run(fmt.Sprintf(":%d", port))

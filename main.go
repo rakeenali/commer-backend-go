@@ -14,6 +14,8 @@ func main() {
 		models.WithUserModel(),
 		models.WithAccountsModel(),
 		models.WithUserRoleModel(),
+		models.WithTagsModel(),
+		models.WithItemsModel(),
 	)
 	jwt := auth.InitAuth(cfg.Secret)
 	m.ApplyMigration()
