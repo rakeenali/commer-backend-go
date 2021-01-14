@@ -9,6 +9,8 @@ var (
 	ErrAccountUpdate      publicError = "Error occurred while updating account"
 	ErrUserExist          publicError = "User with this username already exist"
 	ErrInvalidCredentials publicError = "Invalid email or password"
+	ErrAccessNotGranted   publicError = "Access to resource is not available"
+	ErrInvalidID          publicError = "Invalid id provided"
 
 	SucUserCreated    string = "User created successfully"
 	SucUserLogin      string = "Login successfull"

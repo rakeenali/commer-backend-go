@@ -51,7 +51,7 @@ func (ug *userGorm) ByUsername(username string) (*User, error) {
 	var user User
 
 	err := ug.db.Where("username = ?",
-		username).Preload("Account").First(&user).Error
+		username).Preload("Account").Preload("Role").First(&user).Error
 
 	if err != nil {
 		return nil, err

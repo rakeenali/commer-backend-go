@@ -19,7 +19,7 @@ type Router struct {
 	models      *models.Models
 }
 
-// WithModel a
+// WithModel hook will setup model for router
 func WithModel(m *models.Models) RouterConfig {
 	return func(r *Router) error {
 		r.models = m
@@ -27,7 +27,15 @@ func WithModel(m *models.Models) RouterConfig {
 	}
 }
 
-// WithUserRouter a
+// WithMiddlewares hook will setup middlewares for router
+func WithMiddlewares(jwt auth.Auth) RouterConfig {
+	return func(r *Router) error {
+		r.middlewares = newMiddlewares(r.models, jwt)
+		return nil
+	}
+}
+
+// WithUserRouter hook will setup user handler for router
 func WithUserRouter(jwt auth.Auth, hashSalt string) RouterConfig {
 	hash := hash.NewHash(hashSalt)
 
@@ -37,18 +45,10 @@ func WithUserRouter(jwt auth.Auth, hashSalt string) RouterConfig {
 	}
 }
 
-// WithMiddlewares a
-func WithMiddlewares(jwt auth.Auth) RouterConfig {
-	return func(r *Router) error {
-		r.middlewares = newMiddlewares(r.models, jwt)
-		return nil
-	}
-}
-
 // NewRouter a
-func NewRouter(cfgs ...RouterConfig) Router {
+func NewRouter(configs ...RouterConfig) Router {
 	var r Router
-	for _, cfg := range cfgs {
+	for _, cfg := range configs {
 		err := cfg(&r)
 		if err != nil {
 			panic(err)

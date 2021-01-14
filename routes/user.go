@@ -6,8 +6,8 @@ import (
 	"commerce/hash"
 	"commerce/helpers"
 	"commerce/models"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +36,6 @@ type Users struct {
 
 // InitUserRoutes will initialize user routes
 func (u *Users) InitUserRoutes(rg *gin.RouterGroup, mw *middlewares) {
-	fmt.Println(u)
 	router := rg.Group("/users")
 
 	router.POST("/register", u.registerUser)
@@ -45,6 +44,10 @@ func (u *Users) InitUserRoutes(rg *gin.RouterGroup, mw *middlewares) {
 	router.Use(mw.requireUser)
 	router.GET("/authenticate", u.authenticated)
 	router.POST("/account-update", u.updateAccount)
+
+	router.Use(mw.requireAdmin)
+	router.POST("/make-admin", u.makeAdmin)
+	router.GET("/revoke-admin/:user_id", u.revokeAdmin)
 }
 
 // registerUser creates a new user
@@ -164,4 +167,67 @@ func (u *Users) updateAccount(c *gin.Context) {
 	}
 
 	helpers.OKResponse(c, helpers.SucAccountUpdated, http.StatusOK, account)
+}
+
+// makeAdmin will give admin rights to a user
+func (u *Users) makeAdmin(c *gin.Context) {
+	var data makeAdminSchema
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		helpers.InternalServerErrorResponse(c, err)
+		return
+	}
+
+	user, err := u.models.User.ByUsername(data.Username)
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	if user.Role.Type == "admin" {
+		helpers.OKResponse(c, "User already has status of admin", 0, user.Role)
+		return
+	}
+
+	userRole := models.UserRole{
+		UserID: user.ID,
+		Type:   "admin",
+	}
+
+	err = u.models.UserRole.Create(&userRole)
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	helpers.OKResponse(c, "User's been given admin rights", http.StatusCreated, userRole)
+}
+
+func (u *Users) revokeAdmin(c *gin.Context) {
+	var data revokeAdminURI
+	err := c.ShouldBindUri(&data)
+	if err != nil {
+		helpers.InternalServerErrorResponse(c, err)
+		return
+	}
+
+	id, err := strconv.Atoi(data.UserID)
+	if err != nil {
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidID, http.StatusNotFound)
+		return
+	}
+
+	ur, err := u.models.UserRole.ByUserID(uint(id))
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	err = u.models.UserRole.Delete(ur.ID)
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	helpers.OKResponse(c, "User's access has been revoked", 0, nil)
 }

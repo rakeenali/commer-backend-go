@@ -21,6 +21,15 @@ type updateAccountSchema struct {
 	LastName  string `json:"last_name"`
 }
 
+type makeAdminSchema struct {
+	Username string `json:"username" validate:"required"`
+}
+
+type revokeAdminURI struct {
+	UserID string `uri:"user_id" binding:"required"`
+}
+
+// Validate json body
 type publicError struct {
 	Field   string
 	Message string

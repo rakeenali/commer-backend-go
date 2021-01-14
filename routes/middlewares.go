@@ -61,3 +61,15 @@ func (m *middlewares) requireUser(c *gin.Context) {
 	context.SetUser(c, user)
 	c.Next()
 }
+
+func (m *middlewares) requireAdmin(c *gin.Context) {
+	user := context.GetUser(c)
+
+	if user.Role.ID != 0 && user.Role.Type == "admin" {
+		c.Next()
+		return
+	}
+
+	helpers.ErrResponse(c, nil, helpers.ErrAccessNotGranted, http.StatusUnauthorized)
+	c.Abort()
+}
