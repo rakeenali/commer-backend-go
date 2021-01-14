@@ -6,62 +6,49 @@ import (
 	"commerce/hash"
 	"commerce/helpers"
 	"commerce/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func initUserRoutes(
-	rg *gin.RouterGroup,
-	models *models.Models,
-	hash hash.Service,
-	jwt auth.Auth,
-	mw *middlewares,
-) {
-	router := rg.Group("/users")
-
-	users := newUserRouter(router, models, hash, jwt)
-	group := users.rg
-
-	group.GET("/", users.GetUsers)
-	group.POST("/register", users.RegisterUser)
-	group.POST("/login", users.LoginUser)
-
-	group.Use(mw.requireUser)
-	group.GET("/authenticate", users.Authenticate)
-	group.POST("/account-update", users.UpdateAccount)
-}
-
 // NewUsersRoute initialize users route
 func newUserRouter(
-	rg *gin.RouterGroup,
 	models *models.Models,
 	hash hash.Service,
 	jwt auth.Auth,
 ) *Users {
 	return &Users{
-		rg:     rg,
 		models: models,
-		hash:   hash,
-		jwt:    jwt,
+
+		hash: hash,
+		jwt:  jwt,
 	}
 }
 
 // Users router
 type Users struct {
-	rg     *gin.RouterGroup
 	models *models.Models
-	hash   hash.Service
-	jwt    auth.Auth
+
+	hash hash.Service
+	jwt  auth.Auth
 }
 
-// GetUsers is dummy
-func (u *Users) GetUsers(c *gin.Context) {
-	c.JSON(http.StatusOK, "users")
+// InitUserRoutes will initialize user routes
+func (u *Users) InitUserRoutes(rg *gin.RouterGroup, mw *middlewares) {
+	fmt.Println(u)
+	router := rg.Group("/users")
+
+	router.POST("/register", u.registerUser)
+	router.POST("/login", u.loginUser)
+
+	router.Use(mw.requireUser)
+	router.GET("/authenticate", u.authenticated)
+	router.POST("/account-update", u.updateAccount)
 }
 
-// RegisterUser creates a new user
-func (u *Users) RegisterUser(c *gin.Context) {
+// registerUser creates a new user
+func (u *Users) registerUser(c *gin.Context) {
 	var data userRegisterSchema
 	// var user models.User
 	err := c.ShouldBindJSON(&data)
@@ -104,8 +91,8 @@ func (u *Users) RegisterUser(c *gin.Context) {
 	helpers.OKResponse(c, helpers.SucUserCreated, http.StatusCreated, &user)
 }
 
-// LoginUser will authenticate a user
-func (u *Users) LoginUser(c *gin.Context) {
+// loginUser will authenticate a user
+func (u *Users) loginUser(c *gin.Context) {
 	var data userSchema
 	err := c.ShouldBindJSON(&data)
 	if err != nil {
@@ -151,14 +138,14 @@ func (u *Users) LoginUser(c *gin.Context) {
 	return
 }
 
-// Authenticate will authenticate user's token
-func (u *Users) Authenticate(c *gin.Context) {
+// authenticated will authenticate user's token
+func (u *Users) authenticated(c *gin.Context) {
 	user := context.GetUser(c)
 	helpers.OKResponse(c, helpers.SucUserLogin, http.StatusOK, user)
 }
 
-// UpdateAccount will update users account firstname and lastname
-func (u *Users) UpdateAccount(c *gin.Context) {
+// updateAccount will update users account firstname and lastname
+func (u *Users) updateAccount(c *gin.Context) {
 	var body updateAccountSchema
 	user := context.GetUser(c)
 	err := c.ShouldBindJSON(&body)

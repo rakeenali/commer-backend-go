@@ -18,5 +18,10 @@ func main() {
 	jwt := auth.InitAuth(cfg.Secret)
 	m.ApplyMigration()
 
-	routes.Run(cfg.Port, m, cfg.Salt, jwt)
+	r := routes.NewRouter(
+		routes.WithModel(m),
+		routes.WithMiddlewares(jwt),
+		routes.WithUserRouter(jwt, cfg.Salt),
+	)
+	r.Run(cfg.Port)
 }
