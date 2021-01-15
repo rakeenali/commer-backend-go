@@ -14,6 +14,7 @@ type Tags struct {
 
 // TagsModel interface that implements the tags model
 type TagsModel interface {
+	Create(*Tags) error
 }
 
 func newTagsModel(db *gorm.DB) TagsModel {
@@ -24,4 +25,8 @@ func newTagsModel(db *gorm.DB) TagsModel {
 
 type tagsModel struct {
 	db *gorm.DB
+}
+
+func (tm *tagsModel) Create(t *Tags) error {
+	return tm.db.Create(t).Error
 }

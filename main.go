@@ -24,6 +24,7 @@ func main() {
 		routes.WithModel(m),
 		routes.WithMiddlewares(jwt),
 		routes.WithUserRouter(jwt, cfg.Salt),
+		routes.WithTags(),
 	)
 	r.Run(cfg.Port)
 }

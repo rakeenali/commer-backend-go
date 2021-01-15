@@ -29,6 +29,10 @@ type revokeAdminURI struct {
 	UserID string `uri:"user_id" binding:"required"`
 }
 
+type tagSchema struct {
+	Name string `json:"name" validate:"required"`
+}
+
 // Validate json body
 type publicError struct {
 	Field   string

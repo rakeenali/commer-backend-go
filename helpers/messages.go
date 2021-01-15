@@ -15,6 +15,7 @@ var (
 	SucUserCreated    string = "User created successfully"
 	SucUserLogin      string = "Login successfull"
 	SucAccountUpdated string = "Account Updated"
+	SucTagCreated     string = "Tag created successfully"
 )
 
 // PublicError interface that implements public error
