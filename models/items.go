@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"commerce/helpers"
+
+	"gorm.io/gorm"
+)
 
 // Items database model implementation
 type Items struct {
@@ -17,6 +21,11 @@ type Items struct {
 
 // ItemsModel interface that implements the items model
 type ItemsModel interface {
+	List(*[]Items) error
+	ByID(uint) (*Items, error)
+	Create(item *Items, tags []Tags) (*Items, error)
+	Update(uint, *Items, []Tags) error
+	Delete(id uint) error
 }
 
 func newItemsModel(db *gorm.DB) ItemsModel {
@@ -27,4 +36,69 @@ func newItemsModel(db *gorm.DB) ItemsModel {
 
 type itemsModel struct {
 	db *gorm.DB
+}
+
+func (im *itemsModel) List(items *[]Items) error {
+	err := im.db.Preload("Tags").Find(items).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (im *itemsModel) ByID(id uint) (*Items, error) {
+	var item Items
+	err := im.db.Where("id = ?",
+		id).Preload("Tags").First(&item).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, helpers.ErrNotFound
+		}
+		panic(err)
+	}
+
+	return &item, nil
+}
+
+func (im *itemsModel) Create(item *Items, tags []Tags) (*Items, error) {
+	err := im.db.Create(item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = im.db.Model(&item).Association("Tags").Append(&tags)
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func (im *itemsModel) Update(id uint, updatedItem *Items, tags []Tags) error {
+	var item Items
+	item.ID = id
+
+	err := im.db.Model(&item).Updates(&updatedItem).Error
+	if err != nil {
+		return err
+	}
+
+	err = im.db.Model(&item).Association("Tags").Replace(&tags)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (im *itemsModel) Delete(id uint) error {
+	var item Items
+	item.ID = id
+
+	err := im.db.Delete(&item).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

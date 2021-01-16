@@ -33,6 +33,22 @@ type tagSchema struct {
 	Name string `json:"name" validate:"required"`
 }
 
+type itemsSchema struct {
+	Name  string      `json:"name" validate:"required"`
+	Sku   string      `json:"sku" validate:"required"`
+	Image string      `json:"image" validate:"required"`
+	Price uint64      `json:"price" validate:"required"`
+	Tags  []tagSchema `json:"tags"`
+}
+
+type itemURI struct {
+	ItemID string `uri:"item_id" binding:"required"`
+}
+
+type uriID struct {
+	ID string `uri:"id" binding:"required"`
+}
+
 // Validate json body
 type publicError struct {
 	Field   string
