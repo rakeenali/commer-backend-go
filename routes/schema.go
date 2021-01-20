@@ -49,6 +49,11 @@ type uriID struct {
 	ID string `uri:"id" binding:"required"`
 }
 
+type userBalanceSchema struct {
+	UserID  uint    `json:"user_id" validate:"required"`
+	Balance float32 `json:"balance" validate:"required"`
+}
+
 // Validate json body
 type publicError struct {
 	Field   string

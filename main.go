@@ -16,9 +16,11 @@ func main() {
 		models.WithUserRoleModel(),
 		models.WithTagsModel(),
 		models.WithItemsModel(),
+		models.WithUserBalanceModels(),
 	)
 	jwt := auth.InitAuth(cfg.Secret)
 	m.ApplyMigration()
+	// m.DestroyTables()
 
 	r := routes.NewRouter(
 		routes.WithModel(m),
@@ -26,6 +28,7 @@ func main() {
 		routes.WithUserRouter(jwt, cfg.Salt),
 		routes.WithTags(),
 		routes.WithItemsRouter(),
+		routes.WithOrdersRouter(),
 	)
 	r.Run(cfg.Port)
 }

@@ -9,10 +9,11 @@ type User struct {
 	// gorm.Model
 	GormModelPK
 
-	Username string   `gorm:"not null;uniqueIndex" json:"username"`
-	Password string   `gorm:"not null;" json:"password"`
-	Account  Accounts `gorm:"foreignKey:UserID;references:ID" json:"account"`
-	Role     UserRole `gorm:"foreignKey:UserID;references:ID" json:"user_role"`
+	Username string      `gorm:"not null;uniqueIndex" json:"username"`
+	Password string      `gorm:"not null;" json:"password"`
+	Account  Accounts    `gorm:"foreignKey:UserID;references:ID" json:"account"`
+	Role     UserRole    `gorm:"foreignKey:UserID;references:ID" json:"user_role"`
+	Balance  UserBalance `gorm:"foreignKey:UserID;references:ID" json:"balance"`
 
 	GormModelSfd
 }
@@ -22,6 +23,7 @@ type userModel interface {
 	Create(*User) error
 
 	ByUsername(string) (*User, error)
+	ByID(uint) (*User, error)
 }
 
 // newUserModel will initialize the user model
@@ -51,7 +53,20 @@ func (ug *userGorm) ByUsername(username string) (*User, error) {
 	var user User
 
 	err := ug.db.Where("username = ?",
-		username).Preload("Account").Preload("Role").First(&user).Error
+		username).Preload("Account").Preload("Role").Preload("Balance").First(&user).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (ug *userGorm) ByID(id uint) (*User, error) {
+	var user User
+
+	err := ug.db.Where("id = ?",
+		id).Preload("Account").Preload("Role").Preload("Balance").First(&user).Error
 
 	if err != nil {
 		return nil, err

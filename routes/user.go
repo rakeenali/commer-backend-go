@@ -48,6 +48,8 @@ func (u *Users) InitUserRoutes(rg *gin.RouterGroup, mw *middlewares) {
 	router.Use(mw.requireAdmin)
 	router.POST("/make-admin", u.makeAdmin)
 	router.GET("/revoke-admin/:user_id", u.revokeAdmin)
+
+	router.POST("/add-balance", u.addBalance)
 }
 
 // registerUser creates a new user
@@ -230,4 +232,33 @@ func (u *Users) revokeAdmin(c *gin.Context) {
 	}
 
 	helpers.OKResponse(c, "User's access has been revoked", 0, nil)
+}
+
+func (u *Users) addBalance(c *gin.Context) {
+	var schema userBalanceSchema
+	err := c.ShouldBindJSON(&schema)
+	if err != nil {
+		helpers.InternalServerErrorResponse(c, err)
+		return
+	}
+
+	errors := validateSchema(&schema)
+	if errors != nil {
+		helpers.InvalidBodyErrorResponse(c, errors)
+		return
+	}
+
+	user, err := u.models.User.ByID(schema.UserID)
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	userBalance, err := u.models.UserBalance.Credit(user, schema.Balance)
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+		return
+	}
+
+	helpers.OKResponse(c, "Add balance to user", 0, userBalance)
 }

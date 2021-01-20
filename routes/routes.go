@@ -14,10 +14,11 @@ type RouterConfig func(*Router) error
 
 //Router a
 type Router struct {
-	userRouter  *Users
-	middlewares *middlewares
-	tagRouter   *tags
-	itemsRouter *items
+	userRouter   *Users
+	middlewares  *middlewares
+	tagRouter    *tags
+	itemsRouter  *items
+	ordersRouter *orders
 
 	models *models.Models
 }
@@ -65,6 +66,14 @@ func WithItemsRouter() RouterConfig {
 	}
 }
 
+// WithOrdersRouter will init orders router
+func WithOrdersRouter() RouterConfig {
+	return func(r *Router) error {
+		r.ordersRouter = initOrders(r.models)
+		return nil
+	}
+}
+
 // NewRouter a
 func NewRouter(configs ...RouterConfig) Router {
 	var r Router
@@ -86,6 +95,7 @@ func (r *Router) Run(port int) {
 	r.userRouter.InitUserRoutes(apiV1, r.middlewares)
 	r.tagRouter.initTagRouter(apiV1, r.middlewares)
 	r.itemsRouter.initItemsRouter(apiV1, r.middlewares)
+	r.ordersRouter.initRouter(apiV1, r.middlewares)
 
 	g.Run(fmt.Sprintf(":%d", port))
 }

@@ -65,6 +65,15 @@ func WithItemsModel() ModelConfig {
 	}
 }
 
+// WithUserBalanceModels will initialize user tags model
+func WithUserBalanceModels() ModelConfig {
+	return func(m *Models) error {
+		bm := newUserBalanceModel(m.db)
+		m.UserBalance = bm
+		return nil
+	}
+}
+
 // NewModels will initialize models
 func NewModels(fns ...ModelConfig) *Models {
 	var m Models
@@ -80,35 +89,43 @@ func NewModels(fns ...ModelConfig) *Models {
 
 // Models struct for db
 type Models struct {
-	User     userModel
-	Accounts AccountsModel
-	UserRole UserRoleModel
-	Tags     TagsModel
-	Items    ItemsModel
+	User        userModel
+	Accounts    AccountsModel
+	UserRole    UserRoleModel
+	Tags        TagsModel
+	Items       ItemsModel
+	UserBalance UserBalanceModel
 
 	db *gorm.DB
 }
 
 // ApplyMigration will drop all the tables provided and will then create new migrations
 func (m *Models) ApplyMigration() {
-	m.db.AutoMigrate(&User{}, &Accounts{}, &UserRole{}, &Tags{}, &Items{})
+	m.db.AutoMigrate(
+		&User{},
+		&Accounts{},
+		&UserRole{},
+		&Tags{},
+		&Items{},
+		&UserBalance{},
+	)
 }
 
 // DestroyTables will destroy tables
 func (m *Models) DestroyTables() {
 
-	exist := m.db.Migrator().HasTable(&User{})
+	exist := m.db.Migrator().HasTable(&UserBalance{})
 	if exist {
-		err := m.db.Migrator().DropTable(&User{})
+		err := m.db.Migrator().DropTable(&UserBalance{})
 		if err != nil {
 			panic(err)
 		}
 	}
-	exist = m.db.Migrator().HasTable(&Accounts{})
-	if exist {
-		err := m.db.Migrator().DropTable(&Accounts{})
-		if err != nil {
-			panic(err)
-		}
-	}
+	// exist = m.db.Migrator().HasTable(&Accounts{})
+	// if exist {
+	// 	err := m.db.Migrator().DropTable(&Accounts{})
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// }
 }
