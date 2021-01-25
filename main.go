@@ -17,10 +17,11 @@ func main() {
 		models.WithTagsModel(),
 		models.WithItemsModel(),
 		models.WithUserBalanceModels(),
+		models.WithOrders(),
 	)
 	jwt := auth.InitAuth(cfg.Secret)
-	m.ApplyMigration()
 	// m.DestroyTables()
+	m.ApplyMigration()
 
 	r := routes.NewRouter(
 		routes.WithModel(m),

@@ -54,6 +54,12 @@ type userBalanceSchema struct {
 	Balance float32 `json:"balance" validate:"required"`
 }
 
+type createOrderSchema struct {
+	ItemIDs []uint  `json:"items_ids" validate:"required"`
+	Charge  float64 `json:"charge" validate:"required"`
+	Address string  `json:"address" validate:"required"`
+}
+
 // Validate json body
 type publicError struct {
 	Field   string

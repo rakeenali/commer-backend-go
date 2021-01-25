@@ -14,6 +14,7 @@ type User struct {
 	Account  Accounts    `gorm:"foreignKey:UserID;references:ID" json:"account"`
 	Role     UserRole    `gorm:"foreignKey:UserID;references:ID" json:"user_role"`
 	Balance  UserBalance `gorm:"foreignKey:UserID;references:ID" json:"balance"`
+	Orders   []Orders    `json:"orders"`
 
 	GormModelSfd
 }

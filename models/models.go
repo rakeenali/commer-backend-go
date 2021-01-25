@@ -74,6 +74,15 @@ func WithUserBalanceModels() ModelConfig {
 	}
 }
 
+// WithOrders will initialize orders model
+func WithOrders() ModelConfig {
+	return func(m *Models) error {
+		o := newOrdersModel(m.db)
+		m.Orders = o
+		return nil
+	}
+}
+
 // NewModels will initialize models
 func NewModels(fns ...ModelConfig) *Models {
 	var m Models
@@ -95,6 +104,7 @@ type Models struct {
 	Tags        TagsModel
 	Items       ItemsModel
 	UserBalance UserBalanceModel
+	Orders      OrdersModel
 
 	db *gorm.DB
 }
@@ -108,15 +118,16 @@ func (m *Models) ApplyMigration() {
 		&Tags{},
 		&Items{},
 		&UserBalance{},
+		&Orders{},
 	)
 }
 
 // DestroyTables will destroy tables
 func (m *Models) DestroyTables() {
 
-	exist := m.db.Migrator().HasTable(&UserBalance{})
+	exist := m.db.Migrator().HasTable(&Orders{})
 	if exist {
-		err := m.db.Migrator().DropTable(&UserBalance{})
+		err := m.db.Migrator().DropTable(&Orders{})
 		if err != nil {
 			panic(err)
 		}
