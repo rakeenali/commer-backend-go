@@ -4,6 +4,7 @@ import (
 	"commerce/auth"
 	"commerce/config"
 	"commerce/models"
+	"commerce/normalizer"
 	"commerce/routes"
 )
 
@@ -23,8 +24,11 @@ func main() {
 	// m.DestroyTables()
 	m.ApplyMigration()
 
+	normalizer := normalizer.InitNormalizer()
+
 	r := routes.NewRouter(
 		routes.WithModel(m),
+		routes.WithNormalizer(normalizer),
 		routes.WithMiddlewares(jwt),
 		routes.WithUserRouter(jwt, cfg.Salt),
 		routes.WithTags(),

@@ -6,6 +6,7 @@ import (
 	"commerce/hash"
 	"commerce/helpers"
 	"commerce/models"
+	"commerce/normalizer"
 	"net/http"
 	"strconv"
 
@@ -15,11 +16,13 @@ import (
 // NewUsersRoute initialize users route
 func newUserRouter(
 	models *models.Models,
+	n normalizer.Normalizer,
 	hash hash.Service,
 	jwt auth.Auth,
 ) *Users {
 	return &Users{
-		models: models,
+		models:     models,
+		normalizer: n,
 
 		hash: hash,
 		jwt:  jwt,
@@ -28,7 +31,8 @@ func newUserRouter(
 
 // Users router
 type Users struct {
-	models *models.Models
+	models     *models.Models
+	normalizer normalizer.Normalizer
 
 	hash hash.Service
 	jwt  auth.Auth
@@ -92,8 +96,7 @@ func (u *Users) registerUser(c *gin.Context) {
 		helpers.InternalServerErrorResponse(c, err)
 		return
 	}
-	user.Password = ""
-	helpers.OKResponse(c, helpers.SucUserCreated, http.StatusCreated, &user)
+	helpers.OKResponse(c, helpers.SucUserCreated, http.StatusCreated, u.normalizer.User(&user))
 }
 
 // loginUser will authenticate a user
@@ -135,7 +138,7 @@ func (u *Users) loginUser(c *gin.Context) {
 	})
 
 	m := map[string]interface{}{
-		"user":  user,
+		"user":  u.normalizer.User(user),
 		"token": token,
 	}
 
@@ -146,7 +149,7 @@ func (u *Users) loginUser(c *gin.Context) {
 // authenticated will authenticate user's token
 func (u *Users) authenticated(c *gin.Context) {
 	user := context.GetUser(c)
-	helpers.OKResponse(c, helpers.SucUserLogin, http.StatusOK, user)
+	helpers.OKResponse(c, helpers.SucUserLogin, http.StatusOK, u.normalizer.User(user))
 }
 
 // updateAccount will update users account firstname and lastname
@@ -168,7 +171,7 @@ func (u *Users) updateAccount(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, helpers.SucAccountUpdated, http.StatusOK, account)
+	helpers.OKResponse(c, helpers.SucAccountUpdated, http.StatusOK, u.normalizer.Account(account))
 }
 
 // makeAdmin will give admin rights to a user
@@ -202,7 +205,7 @@ func (u *Users) makeAdmin(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "User's been given admin rights", http.StatusCreated, userRole)
+	helpers.OKResponse(c, "User's been given admin rights", http.StatusCreated, u.normalizer.Role(&userRole))
 }
 
 // revokeAdmin will revoke admins access from user
@@ -262,5 +265,5 @@ func (u *Users) addBalance(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "Add balance to user", 0, userBalance)
+	helpers.OKResponse(c, "Add balance to user", 0, u.normalizer.Balance(userBalance))
 }

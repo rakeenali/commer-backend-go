@@ -4,6 +4,7 @@ import (
 	"commerce/auth"
 	"commerce/hash"
 	"commerce/models"
+	"commerce/normalizer"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -20,13 +21,22 @@ type Router struct {
 	itemsRouter  *items
 	ordersRouter *orders
 
-	models *models.Models
+	models     *models.Models
+	normalizer normalizer.Normalizer
 }
 
 // WithModel hook will setup model for router
 func WithModel(m *models.Models) RouterConfig {
 	return func(r *Router) error {
 		r.models = m
+		return nil
+	}
+}
+
+// WithNormalizer hook will setup normalizer helper for router
+func WithNormalizer(n normalizer.Normalizer) RouterConfig {
+	return func(r *Router) error {
+		r.normalizer = n
 		return nil
 	}
 }
@@ -44,7 +54,7 @@ func WithUserRouter(jwt auth.Auth, hashSalt string) RouterConfig {
 	hash := hash.NewHash(hashSalt)
 
 	return func(r *Router) error {
-		r.userRouter = newUserRouter(r.models, hash, jwt)
+		r.userRouter = newUserRouter(r.models, r.normalizer, hash, jwt)
 		return nil
 	}
 }
