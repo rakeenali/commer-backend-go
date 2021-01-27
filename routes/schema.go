@@ -50,14 +50,14 @@ type uriID struct {
 }
 
 type userBalanceSchema struct {
-	UserID  uint    `json:"user_id" validate:"required"`
-	Balance float32 `json:"balance" validate:"required"`
+	UserID  uint   `json:"user_id" validate:"required"`
+	Balance uint64 `json:"balance" validate:"required"`
 }
 
 type createOrderSchema struct {
-	ItemIDs []uint  `json:"items_ids" validate:"required"`
-	Charge  float64 `json:"charge" validate:"required"`
-	Address string  `json:"address" validate:"required"`
+	ItemIDs []uint `json:"items_ids" validate:"required"`
+	Charge  uint64 `json:"charge" validate:"required"`
+	Address string `json:"address" validate:"required"`
 }
 
 // Validate json body

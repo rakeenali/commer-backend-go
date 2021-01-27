@@ -8,11 +8,11 @@ import (
 type Orders struct {
 	GormModelPK
 
-	Charge  float64 `gorm:"not null" json:"charge"`
+	Charge  uint64  `gorm:"not null" json:"charge"`
 	Address string  `gorm:"not null" json:"address"`
 	UserID  uint    `gorm:"not null" json:"user_id"`
-	User    User    `gorm:"references:ID"`
-	Items   []Items `gorm:"many2many:order_items;"`
+	User    User    `gorm:"references:ID" json:"user"`
+	Items   []Items `gorm:"many2many:order_items;" json:"items"`
 
 	GormModelSfd
 }
@@ -25,11 +25,22 @@ func newOrdersModel(db *gorm.DB) OrdersModel {
 
 // OrdersModel wil implements the order
 type OrdersModel interface {
+	List(userID uint) (*[]Orders, error)
 	Create(*Orders, *[]Items) error
 }
 
 type ordersModel struct {
 	db *gorm.DB
+}
+
+func (om *ordersModel) List(userID uint) (*[]Orders, error) {
+	var orders []Orders
+	err := om.db.Preload("Items").Preload("Items.Tags").Find(&orders).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &orders, nil
 }
 
 func (om *ordersModel) Create(order *Orders, items *[]Items) error {
@@ -42,5 +53,6 @@ func (om *ordersModel) Create(order *Orders, items *[]Items) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

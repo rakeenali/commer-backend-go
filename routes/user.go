@@ -205,6 +205,7 @@ func (u *Users) makeAdmin(c *gin.Context) {
 	helpers.OKResponse(c, "User's been given admin rights", http.StatusCreated, userRole)
 }
 
+// revokeAdmin will revoke admins access from user
 func (u *Users) revokeAdmin(c *gin.Context) {
 	var data revokeAdminURI
 	err := c.ShouldBindUri(&data)
@@ -234,6 +235,7 @@ func (u *Users) revokeAdmin(c *gin.Context) {
 	helpers.OKResponse(c, "User's access has been revoked", 0, nil)
 }
 
+// addBalance will add balance to user system
 func (u *Users) addBalance(c *gin.Context) {
 	var schema userBalanceSchema
 	err := c.ShouldBindJSON(&schema)
