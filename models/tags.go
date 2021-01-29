@@ -20,7 +20,7 @@ type Tags struct {
 type TagsModel interface {
 	List() (*[]Tags, error)
 	ByID(id uint) (*Tags, error)
-	WithItems(id uint) (*[]Tags, error)
+	WithItems(id uint) (*Tags, error)
 	ByName(name string) (*Tags, error)
 
 	Create(*Tags) error
@@ -40,7 +40,7 @@ type tagsModel struct {
 func (tm *tagsModel) List() (*[]Tags, error) {
 	var tags []Tags
 
-	err := tm.db.Find(&tags).Error
+	err := tm.db.Preload("Items").Preload("Items.Tags").Find(&tags).Error
 
 	return &tags, err
 }
@@ -88,8 +88,8 @@ func (tm *tagsModel) Update(id uint, tag *Tags) error {
 	return nil
 }
 
-func (tm *tagsModel) WithItems(id uint) (*[]Tags, error) {
-	var tags []Tags
+func (tm *tagsModel) WithItems(id uint) (*Tags, error) {
+	var tags Tags
 	err := tm.db.Where("id = ?",
 		id).Preload("Items").Preload("Items.Tags").First(&tags).Error
 	if err != nil {

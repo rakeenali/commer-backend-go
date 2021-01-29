@@ -3,20 +3,26 @@ package routes
 import (
 	"commerce/helpers"
 	"commerce/models"
+	"commerce/normalizer"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func initTag(m *models.Models) *tags {
+func initTag(
+	m *models.Models,
+	normalizer normalizer.Normalizer,
+) *tags {
 	return &tags{
-		models: m,
+		models:     m,
+		normalizer: normalizer,
 	}
 }
 
 type tags struct {
-	models *models.Models
+	models     *models.Models
+	normalizer normalizer.Normalizer
 }
 
 func (t *tags) initTagRouter(rg *gin.RouterGroup, mw *middlewares) {
@@ -32,7 +38,23 @@ func (t *tags) initTagRouter(rg *gin.RouterGroup, mw *middlewares) {
 }
 
 func (t *tags) listTags(c *gin.Context) {
-	helpers.OKResponse(c, "Tag list", 0, nil)
+	tags, err := t.models.Tags.List()
+	if err != nil {
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
+	}
+
+	var response []interface{}
+	for _, tag := range *tags {
+		t := t.normalizer.Tag(&tag, false)
+		response = append(response, t)
+	}
+
+	helpers.OKResponse(
+		c,
+		"List of tags",
+		0,
+		&response,
+	)
 }
 
 func (t *tags) tag(c *gin.Context) {
@@ -55,13 +77,18 @@ func (t *tags) tag(c *gin.Context) {
 		return
 	}
 
-	tags, err := t.models.Tags.WithItems(uint(tagID))
+	exist, err := t.models.Tags.WithItems(uint(tagID))
 	if err != nil {
 		helpers.ErrResponse(c, nil, err, http.StatusBadRequest)
 		return
 	}
 
-	helpers.OKResponse(c, "Tag Item Found", http.StatusFound, &tags)
+	helpers.OKResponse(
+		c,
+		"Tag Item Found",
+		http.StatusFound,
+		t.normalizer.Tag(exist, true),
+	)
 }
 
 func (t *tags) createTag(c *gin.Context) {
@@ -88,7 +115,12 @@ func (t *tags) createTag(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, helpers.SucTagCreated, http.StatusCreated, tag)
+	helpers.OKResponse(
+		c,
+		helpers.SucTagCreated,
+		http.StatusCreated,
+		t.normalizer.Tag(tag, false),
+	)
 	return
 }
 
@@ -140,5 +172,10 @@ func (t *tags) updateTag(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "Tag Updated", http.StatusOK, &newTag)
+	helpers.OKResponse(
+		c,
+		"Tag Updated",
+		http.StatusOK,
+		t.normalizer.Tag(newTag, false),
+	)
 }

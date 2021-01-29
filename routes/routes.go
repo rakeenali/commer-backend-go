@@ -63,7 +63,7 @@ func WithUserRouter(jwt auth.Auth, hashSalt string) RouterConfig {
 func WithTags() RouterConfig {
 
 	return func(r *Router) error {
-		r.tagRouter = initTag(r.models)
+		r.tagRouter = initTag(r.models, r.normalizer)
 		return nil
 	}
 }
@@ -71,7 +71,7 @@ func WithTags() RouterConfig {
 // WithItemsRouter will init items router
 func WithItemsRouter() RouterConfig {
 	return func(r *Router) error {
-		r.itemsRouter = initItems(r.models)
+		r.itemsRouter = initItems(r.models, r.normalizer)
 		return nil
 	}
 }

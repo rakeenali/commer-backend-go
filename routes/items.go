@@ -3,21 +3,23 @@ package routes
 import (
 	"commerce/helpers"
 	"commerce/models"
-	"fmt"
+	"commerce/normalizer"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func initItems(m *models.Models) *items {
+func initItems(m *models.Models, n normalizer.Normalizer) *items {
 	return &items{
-		models: m,
+		models:     m,
+		normalizer: n,
 	}
 }
 
 type items struct {
-	models *models.Models
+	models     *models.Models
+	normalizer normalizer.Normalizer
 }
 
 func (i *items) initItemsRouter(rg *gin.RouterGroup, mw *middlewares) {
@@ -42,7 +44,13 @@ func (i *items) list(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "", 0, &items)
+	var response []interface{}
+	for _, it := range items {
+		item := i.normalizer.Item(&it)
+		response = append(response, item)
+	}
+
+	helpers.OKResponse(c, "List of items", 0, &response)
 
 }
 
@@ -72,7 +80,12 @@ func (i *items) item(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "Item found", http.StatusOK, &exist)
+	helpers.OKResponse(
+		c,
+		"Item found",
+		http.StatusOK,
+		i.normalizer.Item(exist),
+	)
 }
 
 func (i *items) createItem(c *gin.Context) {
@@ -111,9 +124,12 @@ func (i *items) createItem(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("item", newItem)
-
-	helpers.OKResponse(c, "Item Created", http.StatusCreated, nil)
+	helpers.OKResponse(
+		c,
+		"Item Created",
+		http.StatusCreated,
+		i.normalizer.Item(newItem),
+	)
 }
 
 func (i *items) update(c *gin.Context) {
@@ -176,7 +192,11 @@ func (i *items) update(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "", 0, &newItem)
+	helpers.OKResponse(
+		c,
+		"Item updated",
+		http.StatusFound,
+		i.normalizer.Item(newItem))
 
 }
 
@@ -212,6 +232,8 @@ func (i *items) delete(c *gin.Context) {
 		return
 	}
 
-	helpers.OKResponse(c, "Item removed successfully", http.StatusOK, nil)
+	response := make(map[string]interface{})
+	response["itemId"] = itemID
 
+	helpers.OKResponse(c, "Item removed successfully", http.StatusOK, response)
 }

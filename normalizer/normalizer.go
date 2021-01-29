@@ -13,6 +13,8 @@ type Normalizer interface {
 	Account(*models.Accounts) interface{}
 	Balance(*models.UserBalance) interface{}
 	Role(role *models.UserRole) interface{}
+	Tag(*models.Tags, bool) interface{}
+	Item(*models.Items) interface{}
 }
 
 type normalizer struct{}
@@ -68,6 +70,52 @@ func (n *normalizer) Role(role *models.UserRole) interface{} {
 
 	r["id"] = role.ID
 	r["type"] = role.Type
+
+	return r
+}
+
+func (n *normalizer) Tag(tag *models.Tags, withItem bool) interface{} {
+	r := make(map[string]interface{})
+
+	r["id"] = tag.ID
+	r["name"] = tag.Name
+	r["updateAt"] = tag.UpdatedAt
+	r["createdAt"] = tag.CreatedAt
+	r["items"] = nil
+	r["totalItems"] = len(tag.Items)
+
+	if len(tag.Items) > 0 && withItem {
+		var items []interface{}
+		for _, i := range tag.Items {
+			item := n.Item(&i)
+			items = append(items, item)
+		}
+		r["items"] = items
+	}
+
+	return r
+}
+
+func (n *normalizer) Item(item *models.Items) interface{} {
+	r := make(map[string]interface{})
+
+	r["id"] = item.ID
+	r["name"] = item.Name
+	r["image"] = item.Image
+	r["price"] = item.Price
+	r["sku"] = item.Sku
+	r["createAt"] = item.CreatedAt
+	r["updatedAt"] = item.UpdatedAt
+	r["tags"] = nil
+
+	if len(item.Tags) > 0 {
+		var tags []interface{}
+		for _, t := range item.Tags {
+			tag := n.Tag(&t, true)
+			tags = append(tags, tag)
+		}
+		r["tags"] = tags
+	}
 
 	return r
 }
