@@ -79,7 +79,7 @@ func WithItemsRouter() RouterConfig {
 // WithOrdersRouter will init orders router
 func WithOrdersRouter() RouterConfig {
 	return func(r *Router) error {
-		r.ordersRouter = initOrders(r.models)
+		r.ordersRouter = initOrders(r.models, r.normalizer)
 		return nil
 	}
 }

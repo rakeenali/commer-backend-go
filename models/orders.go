@@ -26,6 +26,7 @@ func newOrdersModel(db *gorm.DB) OrdersModel {
 // OrdersModel wil implements the order
 type OrdersModel interface {
 	List(userID uint) (*[]Orders, error)
+	Detail(uint) (*Orders, error)
 	Create(*Orders, *[]Items) error
 }
 
@@ -35,12 +36,24 @@ type ordersModel struct {
 
 func (om *ordersModel) List(userID uint) (*[]Orders, error) {
 	var orders []Orders
-	err := om.db.Preload("Items").Preload("Items.Tags").Find(&orders).Error
+	err := om.db.Where("user_id = ?", userID).Preload("Items").Preload("Items.Tags").Find(&orders).Error
 	if err != nil {
 		return nil, err
 	}
 
 	return &orders, nil
+}
+
+func (om *ordersModel) Detail(orderID uint) (*Orders, error) {
+	var order Orders
+	err := om.db.Where(
+		"id = ?", orderID,
+	).Preload("Items").Preload("Items.Tags").Find(&order).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
 }
 
 func (om *ordersModel) Create(order *Orders, items *[]Items) error {

@@ -12,6 +12,7 @@ var (
 	ErrAccessNotGranted    publicError = "Access to resource is not available"
 	ErrInvalidID           publicError = "Invalid id provided"
 	ErrItemNotFound        publicError = "Item not found"
+	ErrResourceNotFound    publicError = "Resource not found"
 	ErrInsufficientBalance publicError = "You balance is insufficient"
 
 	SucUserCreated    string = "User created successfully"

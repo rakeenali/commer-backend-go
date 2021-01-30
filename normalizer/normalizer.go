@@ -15,6 +15,7 @@ type Normalizer interface {
 	Role(role *models.UserRole) interface{}
 	Tag(*models.Tags, bool) interface{}
 	Item(*models.Items) interface{}
+	Order(*models.Orders) interface{}
 }
 
 type normalizer struct{}
@@ -115,6 +116,28 @@ func (n *normalizer) Item(item *models.Items) interface{} {
 			tags = append(tags, tag)
 		}
 		r["tags"] = tags
+	}
+
+	return r
+}
+
+func (n *normalizer) Order(order *models.Orders) interface{} {
+	r := make(map[string]interface{})
+
+	r["id"] = order.ID
+	r["charge"] = order.Charge
+	r["address"] = order.Address
+	r["userId"] = order.UserID
+	r["totalItems"] = len(order.Items)
+	r["items"] = nil
+
+	if len(order.Items) > 0 {
+		var items []interface{}
+		for _, i := range order.Items {
+			item := n.Item(&i)
+			items = append(items, item)
+		}
+		r["items"] = items
 	}
 
 	return r
