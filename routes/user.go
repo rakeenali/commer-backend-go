@@ -116,12 +116,7 @@ func (u *Users) loginUser(c *gin.Context) {
 
 	user, err := u.models.User.ByUsername(data.Username)
 	if err != nil {
-		switch err {
-		case helpers.ErrNotFound:
-			helpers.ErrResponse(c, nil, helpers.ErrInvalidCredentials, http.StatusNotFound)
-		default:
-			helpers.InternalServerErrorResponse(c, err)
-		}
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidCredentials, http.StatusNotFound)
 		return
 	}
 

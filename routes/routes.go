@@ -7,6 +7,7 @@ import (
 	"commerce/normalizer"
 	"fmt"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -99,6 +100,18 @@ func NewRouter(configs ...RouterConfig) Router {
 // Run will run the router
 func (r *Router) Run(port int) {
 	g := gin.Default()
+	// config := cors.DefaultConfig()
+	// config.AllowHeaders = []string{"Origin", "Authorization"}
+	// config.AllowAllOrigins = true
+
+	g.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
+		AllowHeaders:     []string{"Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		AllowOrigins:     []string{"*"},
+		MaxAge:           86400,
+	}))
 
 	apiV1 := g.Group("/api/v1")
 

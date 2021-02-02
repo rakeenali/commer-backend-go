@@ -8,7 +8,7 @@ var (
 	ErrInvalidToken        publicError = "Auth Token is not valid"
 	ErrAccountUpdate       publicError = "Error occurred while updating account"
 	ErrUserExist           publicError = "User with this username already exist"
-	ErrInvalidCredentials  publicError = "Invalid email or password"
+	ErrInvalidCredentials  publicError = "Invalid username or password"
 	ErrAccessNotGranted    publicError = "Access to resource is not available"
 	ErrInvalidID           publicError = "Invalid id provided"
 	ErrItemNotFound        publicError = "Item not found"

@@ -1,5 +1,5 @@
 {
-    "port": 3000,
+    "port": 5000,
     "env": "dev",
     "salt": "sadafsdfsdfdasfsdf",
     "jwt_secret": "sadfsdfdfdsfsdfwe54654s6dfdsf",
