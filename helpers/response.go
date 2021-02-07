@@ -74,7 +74,7 @@ func ErrResponse(c *gin.Context, data interface{}, err error, code int) {
 	if pErr, ok := err.(PublicError); ok {
 		res.Message = pErr.Public()
 	} else {
-		fmt.Println("Error", err)
+		fmt.Println("Response Error", err)
 		res.Message = "An unknown error ocurred"
 	}
 

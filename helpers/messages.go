@@ -14,6 +14,7 @@ var (
 	ErrItemNotFound        publicError = "Item not found"
 	ErrResourceNotFound    publicError = "Resource not found"
 	ErrInsufficientBalance publicError = "You balance is insufficient"
+	ErrTagExist            publicError = "Tag with name provided already exist"
 
 	SucUserCreated    string = "User created successfully"
 	SucUserLogin      string = "Login successfull"

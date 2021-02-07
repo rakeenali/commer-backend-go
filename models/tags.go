@@ -1,6 +1,8 @@
 package models
 
 import (
+	"commerce/helpers"
+	"fmt"
 	"strings"
 
 	"gorm.io/gorm"
@@ -65,7 +67,13 @@ func (tm *tagsModel) ByName(name string) (*Tags, error) {
 
 func (tm *tagsModel) Create(t *Tags) error {
 	t.Name = strings.ToLower(t.Name)
-	return tm.db.Create(t).Error
+	err := tm.db.Create(t).Error
+
+	fmt.Println("error", err)
+	if err != nil {
+		return helpers.ErrTagExist
+	}
+	return err
 }
 
 func (tm *tagsModel) Update(id uint, tag *Tags) error {
