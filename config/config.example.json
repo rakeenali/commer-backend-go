@@ -1,0 +1,13 @@
+{
+    "port": 5000,
+    "env": "",
+    "salt": "",
+    "jwt_secret": "",
+    "database": {
+      "host": "",
+      "user": "",
+      "password": "",
+      "name": "commerce"
+    }
+  }
+  
