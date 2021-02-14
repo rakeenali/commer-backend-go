@@ -5,7 +5,7 @@ import (
 )
 
 // Paginate can be use a scope for gorm  to paginate models
-func Paginate(count *int, pageSize *int, page *int) func(db *gorm.DB) *gorm.DB {
+func Paginate(count *int64, pageSize *int, page *int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		switch {
@@ -16,7 +16,7 @@ func Paginate(count *int, pageSize *int, page *int) func(db *gorm.DB) *gorm.DB {
 		}
 
 		offset := (*page - 1) * *pageSize
-		if offset >= *count {
+		if offset >= int(*count) {
 			*page = 1
 			return db.Offset(0).Limit(*pageSize)
 		}

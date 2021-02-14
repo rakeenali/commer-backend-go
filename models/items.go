@@ -21,7 +21,7 @@ type Items struct {
 
 // ItemsModel interface that implements the items model
 type ItemsModel interface {
-	List(*[]Items, int, int) (int, error)
+	List(*[]Items, *int, *int) (int, error)
 	ByID(uint) (*Items, error)
 	Create(item *Items, tags []Tags) (*Items, error)
 	Update(uint, *Items, []Tags) error
@@ -38,19 +38,16 @@ type itemsModel struct {
 	db *gorm.DB
 }
 
-func (im *itemsModel) List(items *[]Items, pageSize int, page int) (int, error) {
+func (im *itemsModel) List(items *[]Items, pageSize *int, page *int) (int, error) {
 	var count int64
 
 	im.db.Model(&Items{}).Count(&count)
-	var err error
-	offset := (page - 1) * pageSize
 
-	if offset >= int(count) {
-		page = 1
-		err = im.db.Offset(0).Limit(pageSize).Preload("Tags").Find(items).Error
-	} else {
-		err = im.db.Offset(offset).Limit(pageSize).Preload("Tags").Find(items).Error
-	}
+	err := im.db.Scopes(helpers.Paginate(
+		&count,
+		pageSize,
+		page,
+	)).Preload("Tags").Find(items).Error
 	if err != nil {
 		return 0, err
 	}

@@ -38,20 +38,13 @@ func (i *items) initItemsRouter(rg *gin.RouterGroup, mw *middlewares) {
 func (i *items) list(c *gin.Context) {
 	var items []models.Items
 
-	query := c.Request.URL.Query()
-
-	pageSize, err := strconv.Atoi(query["page_size"][0])
+	pageSize, page, err := validatePaginatorParams(c.Request.URL.Query())
 	if err != nil {
-		helpers.ErrResponse(c, nil, helpers.ErrInvalidPageSize, http.StatusNotFound)
-		return
-	}
-	offset, err := strconv.Atoi(query["page"][0])
-	if err != nil {
-		helpers.ErrResponse(c, nil, helpers.ErrInvalidPage, http.StatusNotFound)
+		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
 		return
 	}
 
-	count, err := i.models.Items.List(&items, pageSize, offset)
+	count, err := i.models.Items.List(&items, &pageSize, &page)
 	if err != nil {
 		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
 		return
@@ -70,7 +63,7 @@ func (i *items) list(c *gin.Context) {
 	}{
 		Count:    count,
 		PageSize: pageSize,
-		Page:     offset,
+		Page:     page,
 	}
 	response["meta"] = meta
 	response["items"] = itemsResp

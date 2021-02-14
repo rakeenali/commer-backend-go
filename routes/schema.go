@@ -1,6 +1,10 @@
 package routes
 
 import (
+	"commerce/helpers"
+	"net/url"
+	"strconv"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -86,4 +90,18 @@ func validateSchema(data interface{}) *[]publicError {
 	}
 
 	return nil
+}
+
+func validatePaginatorParams(query url.Values) (int, int, error) {
+	pageSize, err := strconv.Atoi(query["page_size"][0])
+	if err != nil {
+		return 0, 0, helpers.ErrInvalidPageSize
+	}
+	page, err := strconv.Atoi(query["page"][0])
+	if err != nil {
+		return 0, 0, helpers.ErrInvalidPage
+
+	}
+
+	return pageSize, page, err
 }
