@@ -15,6 +15,8 @@ var (
 	ErrResourceNotFound    publicError = "Resource not found"
 	ErrInsufficientBalance publicError = "You balance is insufficient"
 	ErrTagExist            publicError = "Tag with name provided already exist"
+	ErrInvalidPageSize     publicError = "Item query param has invalid page size"
+	ErrInvalidPage         publicError = "Item query param has invalid page"
 
 	SucUserCreated    string = "User created successfully"
 	SucUserLogin      string = "Login successfull"

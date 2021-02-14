@@ -105,7 +105,7 @@ func (r *Router) Run(port int) {
 	// config.AllowAllOrigins = true
 
 	g.Use(cors.New(cors.Config{
-		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "PATCH"},
 		AllowHeaders:     []string{"Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: false,

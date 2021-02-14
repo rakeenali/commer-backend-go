@@ -38,17 +38,42 @@ func (i *items) initItemsRouter(rg *gin.RouterGroup, mw *middlewares) {
 func (i *items) list(c *gin.Context) {
 	var items []models.Items
 
-	err := i.models.Items.List(&items)
+	query := c.Request.URL.Query()
+
+	pageSize, err := strconv.Atoi(query["page_size"][0])
+	if err != nil {
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidPageSize, http.StatusNotFound)
+		return
+	}
+	offset, err := strconv.Atoi(query["page"][0])
+	if err != nil {
+		helpers.ErrResponse(c, nil, helpers.ErrInvalidPage, http.StatusNotFound)
+		return
+	}
+
+	count, err := i.models.Items.List(&items, pageSize, offset)
 	if err != nil {
 		helpers.ErrResponse(c, nil, err, http.StatusNotFound)
 		return
 	}
 
-	var response []interface{}
+	response := make(map[string]interface{})
+	var itemsResp []interface{}
 	for _, it := range items {
 		item := i.normalizer.Item(&it)
-		response = append(response, item)
+		itemsResp = append(itemsResp, item)
 	}
+	meta := struct {
+		Count    int `json:"count"`
+		PageSize int `json:"pageSize"`
+		Page     int `json:"page"`
+	}{
+		Count:    count,
+		PageSize: pageSize,
+		Page:     offset,
+	}
+	response["meta"] = meta
+	response["items"] = itemsResp
 
 	helpers.OKResponse(c, "List of items", 0, &response)
 

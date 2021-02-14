@@ -60,6 +60,11 @@ type createOrderSchema struct {
 	Address string `json:"address" validate:"required"`
 }
 
+type paginationSchema struct {
+	PageSize string `json:"page_size" validate:"required"`
+	Offset   string `json:"offset" validate:"required"`
+}
+
 // Validate json body
 type publicError struct {
 	Field   string
